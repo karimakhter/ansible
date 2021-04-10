@@ -1,0 +1,10 @@
+---
+
+# Gluster configuration
+glusterfs_daemon: glusterd
+glusterfs_default_release: ""
+glusterfs_mount_dir: /mnt/glusterfs
+glusterfs_brick_dir: /srv/glusterfs/brick
+glusterfs_brick_name: glusterfs
+
+

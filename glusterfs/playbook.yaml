@@ -1,0 +1,51 @@
+---
+
+- hosts: gluster
+  become: yes
+  
+
+  vars_files:
+    - vars.yaml
+
+  tasks:
+  - name: Ensure dependencies are installed.
+    yum:
+      name: "centos-release-gluster{{ glusterfs_default_release }}"
+      state: present
+
+  - name: Ensure Gluster packages are installed.
+    yum:
+      name:
+        - glusterfs-server
+        - glusterfs-client
+      state: present
+  - name: Ensure that gluster deamon is running
+    service: "name={{ glusterfs_daemon }} state=started enabled=yes"
+
+  - name: Ensure that directories exists to mount gluster bricks
+    file:
+      path: "{{item}}"
+      state: directory
+      mode: 0775
+    with_items:
+      - "{{ glusterfs_mount_dir }}"
+      - "{{ glusterfs_brick_dir }}"
+
+  - name: Configuration of the Volume
+    gluster_volume:
+      state: present
+      name: "{{ glusterfs_brick_name }}"
+      bricks: "{{ glusterfs_brick_dir }}"
+      replicas: 2
+      cluster: "{{ groups.gluster | join(',') }}"
+      host: "{{ inventory_hostname }}"
+      force: yes
+    run_once: true
+
+  - name: Ensure that Gluster Volume is mounted
+    mount:
+      name: "{{ glusterfs_mount_dir }}"
+      src: "{{ inventory_hostname }}:/{{ glusterfs_brick_name }}"
+      fstype: glusterfs
+      opts: "defaults,_netdev"
+      state: mounted
