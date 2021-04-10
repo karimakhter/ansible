@@ -2,13 +2,13 @@
 
 - hosts: gluster
   become: yes
-  
+    
 
   vars_files:
     - vars.yaml
 
   tasks:
-  - name: Ensure dependencies are installed.
+  - name: Ensure dependencies are installed before configuraing the Glusterfs
     yum:
       name: "centos-release-gluster{{ glusterfs_default_release }}"
       state: present
