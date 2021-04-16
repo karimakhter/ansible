@@ -1,0 +1,42 @@
+- hosts: firewall
+  become: yes
+  vars_files:
+    - vars.yaml
+  tasks:
+  - name:  Ensure that the Iptables are installed
+    package: 
+      name: iptables
+      state: present
+
+  - name: Ensure that the iptables rules are flushed
+    command: iptables -F
+
+  - name: Create a file to insert the iptables rules
+    file: 
+      path: /etc/firewall.bash 
+      state: touch
+  
+  - name: Copy the firewall script to the /etc/firewall.bash
+    template:
+      src: templates/firewall_rules.bash
+      dest: /etc/firewall.bash
+      owner: root
+      group: root
+      mode: 0744
+
+  - name: cope firewall systemd unit file into /etc/systemd/systemd
+    template:
+      src: templates/firewall_systemd_unit
+      dest: /etc/systemd/system/firewall.service
+      owner: root
+      group: root
+      mode: 0644
+
+  - name: Startted the created service with iptable rules
+    service:
+      name: firewall
+      state: started
+      enabled: yes
+
+
+
